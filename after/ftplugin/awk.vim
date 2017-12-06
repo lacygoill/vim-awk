@@ -7,7 +7,7 @@ augroup END
 
 " Mappings {{{1
 
-nno <buffer> <nowait> <silent> K :<c-u>call my_lib#man_k('awk')<cr>
+nno  <buffer><nowait><silent>  K  :<c-u>call my_lib#man_k('awk')<cr>
 
 " Options {{{1
 
