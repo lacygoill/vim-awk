@@ -1,8 +1,3 @@
-if exists('g:autoloaded_awk')
-    finish
-endif
-let g:autoloaded_awk = 1
-
 fu! awk#fold_text() abort "{{{1
     let indent    = repeat(' ', (v:foldlevel-1)*3)
     let title     = substitute(getline(v:foldstart), '\v^\s*#\s*|\s*#?\{\{\{\d?', '', 'g')
