@@ -21,7 +21,7 @@ setl cms=#%s
 augroup my_awk
     au! *            <buffer>
     au  BufWinEnter  <buffer>  setl fdm=marker
-                            \| let &l:fdt = 'awk#fold_text()'
+                            \| let &l:fdt = 'fold#text()'
                             \| setl cocu=nc
                             \| setl cole=3
 augroup END
