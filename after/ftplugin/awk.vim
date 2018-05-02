@@ -21,9 +21,9 @@ setl cms=#%s
 augroup my_awk
     au! *            <buffer>
     au  BufWinEnter  <buffer>  setl fdm=marker
-                            \| setl fdt=fold#text()
-                            \| setl cocu=nc
-                            \| setl cole=3
+                           \ | setl fdt=fold#text()
+                           \ | setl cocu=nc
+                           \ | setl cole=3
 augroup END
 
 setl tw=80
