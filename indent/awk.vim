@@ -1,18 +1,8 @@
-" In an awk buffer, to format and correctly indent a text-object,
-" we can use the `=` operator.
-" It relies on the `GetAwkIndent()` function (value of 'indentexpr').
-" This function is defined in `$VIMRUNTIME/indent/awk.vim`.
-
-" Unfortunately, the indentation is often wrong.
-" Here's the url where I found a better version of this function:
-
-"         http://www.vim.org/scripts/script.php?script_id=4372
-
 " Vim indent file
 " Language:        AWK Script
 " Maintainer:      Clavelito <maromomo@hotmail.com>
-" Last Change:     Tue, 25 Jul 2017 12:13:06 +0900
-" Version:         1.79
+" Last Change:     Mon, 05 Feb 2018 12:16:10 +0900
+" Version:         1.82
 "
 " Description:
 "                  let g:awk_indent_switch_labels = 0
@@ -132,13 +122,13 @@ function s:ContinueLineIndent(line, lnum, cline)
   elseif line =~# '\[\s*\%([^,[:blank:]][^,]\{-},\s*\)\+$'
         \ && s:NoClosedPair(lnum, '\M[', '\M]', lnum)
     let ind = s:GetMatchWidth(line, lnum, s:ncp_cnum)
-  elseif line =~# '\]' && s:PairBalance(line, ']', '[') > 0
+  elseif line =~# '\]' && s:PairBalance(line, '\M]', '\M[') > 0
         \ && line =~# '\\$\|,\s*$' && pline =~# '\\$\|,\s*$'
     let ind = s:NestContinueLineIndent(line, lnum, ']', '[')
   elseif line =~# '\<\%(function\|func\)\s\+\h\w*\s*('. s:TailBslash()
         \ && s:NoClosedPair(lnum, '(', ')', lnum)
-    let ind = s:sw() * 2 > s:ncp_cnum || !g:awk_indent_tail_bslash
-          \ ? s:ncp_cnum : s:sw() * 2
+    let ind = shiftwidth() * 2 > s:ncp_cnum || !g:awk_indent_tail_bslash
+          \ ? s:ncp_cnum : shiftwidth() * 2
   elseif (line =~# '\<\h\w*\s*(.*\\$'
         \ || line =~# '(' && s:PairBalance(line, ')', '(') <= 0
         \ && line =~# '\\$\|\%(&&\|||\|,\)\s*$')
@@ -146,21 +136,21 @@ function s:ContinueLineIndent(line, lnum, cline)
         \ && s:NoClosedPair(lnum, '(', ')', lnum)
     let ind = s:GetMatchWidth(line, lnum, s:ncp_cnum)
   elseif line =~# '^\s*return\>.*\\$'
-    let ind = s:GetMatchWidth(line, lnum, '\C\%(\s*return\>\)\@<=.')
+    let ind = s:GetMatchWidth(line, lnum, '\C\<return\>\zs.')
   elseif line =~# '^\s*printf\=\>\s*\%([^,[:blank:]][^,]\{-},\s*\)\+$'
         \ || line =~# '^\s*printf\=\>\%(\s*(\)\@!' && line =~# '\\$'
-    let ind = s:GetMatchWidth(line, lnum, '\C\%(\s*printf\=\>\)\@<=.')
+    let ind = s:GetMatchWidth(line, lnum, '\C\<printf\=\>\zs.')
   elseif line =~# '[^<>=!]==\@!'
         \ && line =~# '\\$\|\%(&&\|||\)\s*$'
         \ && pline !~# '\\$\|\%(&&\|||\)\s*$'
-    let ind = s:GetMatchWidth(line, lnum, '\%([^<>=!]=\)\@<=.')
+    let ind = s:GetMatchWidth(line, lnum, '[^<>=!]=\zs.')
   elseif line =~# '\\$' && a:cline =~# '^\s*{'
     let ind = indent(get(s:JoinContinueLine(line, lnum, 0), 1))
   elseif ind && line =~# '\\$' && pline !~# '\\$\|\%(&&\|||\|,\)\s*$'
-    let ind = ind + s:sw()
+    let ind = ind + shiftwidth()
   elseif !ind && line =~# '\\$\|\%(&&\|||\)\s*$'
         \ && pline !~# '\\$\|\%(&&\|||\)\s*$'
-    let ind = ind + s:sw() * 2
+    let ind = ind + shiftwidth() * 2
   endif
 
   return [line, lnum, ind]
@@ -168,7 +158,7 @@ endfunction
 
 function s:MorePrevLineIndent(pline, pnum, line, lnum)
   let [pline, pnum, ind] = s:PreMorePrevLine(a:pline, a:pnum, a:line, a:lnum)
-  while pnum
+  while pnum && indent(pnum) <= ind
         \ &&
         \ ((pline =~# '^\s*\%(if\|}\=\s*else\s\+if\|for\|while\)\s*(.*)\s*$'
         \ || pline =~# '^\s*switch\s*(.*)\s*$'
@@ -181,8 +171,6 @@ function s:MorePrevLineIndent(pline, pnum, line, lnum)
       break
     elseif pline =~# '^\s*}\=\s*else\>'
       let [pline, pnum] = s:GetIfLine(pline, pnum, 1)
-    elseif pline =~# '^\s*while\>'
-      let [pline, pnum] = s:GetDoLine(pline, pnum)
     endif
     let [pline, pnum] = s:JoinContinueLine(pline, pnum, 1)
   endwhile
@@ -195,10 +183,7 @@ function s:PrevLineIndent(line, lnum, nnum, ind)
   if a:line =~# '^\s*\%(else\|do\)\s*{\=\s*$'
         \ || a:line =~# '^\s*}\s*else\s*{\=\s*$'
         \ || a:line =~# '^\s*{\s*$'
-    let ind = indent(a:lnum) + s:sw()
-  elseif a:line =~# '^\s*do\>\s*\S'
-        \ && s:GetHideStringLine(a:line) !~# '\%(;\|}\)\s*while\>\s*(.*)'
-    let ind = indent(a:lnum)
+    let ind = indent(a:lnum) + shiftwidth()
   elseif (a:line =~# '^\s*\%(if\|else\s\+if\|for\)\s*(.*)\s*{\=\s*$'
         \ || a:line =~# '^\s*}\s*else\s\+if\s*(.*)\s*{\=\s*$'
         \ || a:line =~# '^\s*switch\s*(.*)\s*{\=\s*$'
@@ -207,12 +192,15 @@ function s:PrevLineIndent(line, lnum, nnum, ind)
         \ || a:line =~# '^\s*while\s*(.*)\s*$'
         \ && get(s:GetDoLine(a:line, a:lnum), 1) == a:lnum)
         \ && s:AfterParenPairNoStr(a:lnum, 1)
-    let ind = indent(a:lnum) + s:sw()
+    let ind = indent(a:lnum) + shiftwidth()
   elseif a:line =~# '{' && s:NoClosedPair(a:lnum, '{', '}', a:nnum)
-    let ind = indent(a:lnum) + s:sw()
+    let ind = indent(a:lnum) + shiftwidth()
+  elseif a:line =~# '^\s*do\>\s*\S'
+        \ && s:GetHideStringLine(a:line) !~# '\%(;\|}\)\s*while\>\s*(.*)'
+    let ind = indent(a:lnum)
   elseif a:line =~# '^\s*\%(case\|default\)\>'
         \ && g:awk_indent_switch_labels > -1
-    let ind = ind + s:sw()
+    let ind = ind + shiftwidth()
   endif
 
   return ind
@@ -228,7 +216,7 @@ function s:CurrentLineIndent(cline, line, lnum, pline, ind)
         \ || a:line =~# '^\s*switch\s*(.*)' && g:awk_indent_switch_labels > -1)
         \ && s:AfterParenPairNoStr(a:lnum, 0)
         \ || a:line =~# '^\s*\%(else\|do\)\s*$')
-    let ind = ind - s:sw()
+    let ind = ind - shiftwidth()
   elseif a:cline =~# '^\s*\%(case\|default\)\>'
         \ && g:awk_indent_switch_labels > -1
         \ &&
@@ -238,7 +226,7 @@ function s:CurrentLineIndent(cline, line, lnum, pline, ind)
         \ || (a:line =~# '^\s*}\%(\s*;\)\=\s*$'
         \ || a:line =~# '}\%(\s*;\)\=\s*$' && a:line !~# '^\s*case\>')
         \ && get(s:GetStartBraceLine(a:line, a:lnum), 0) =~# '^\s*case\>')
-    let ind = ind - s:sw()
+    let ind = ind - shiftwidth()
   endif
 
   return ind
@@ -342,15 +330,16 @@ function s:PreMorePrevLine(pline, pnum, line, lnum)
   let pnum = a:pnum
   let line = a:line
   let lnum = a:lnum
-  if a:line =~# '^\s*}\%(\s*else\>\)\@!' || a:line =~# '}\%(\s*;\)\=\s*$'
+  if a:line =~# '^\s*}\%(\s*\%(else\|while\)\>\)\@!'
+        \ || a:line =~# '}\%(\s*;\)\=\s*$'
     let [line, lnum] = s:GetStartBraceLine(line, lnum)
   elseif a:line =~# '^\s*}\=\s*else\>'
     let [line, lnum] = s:GetIfLine(line, lnum, 1)
-  elseif a:line =~# '^\s*while\>'
+  elseif a:line =~# '^\s*}\=\s*while\>'
     let [line, lnum] = s:GetDoLine(line, lnum)
   endif
   if lnum != a:lnum
-        \ && line =~# '^\s*do\s*{\s*$' && a:line =~# '}\%(\s*;\)\=\s*$'
+        \ && line =~# '^\s*do\s*{' && a:line =~# '}\%(\s*;\)\=\s*$'
     let [pline, pnum] = [line, lnum]
   elseif lnum != a:lnum
     let [pline, pnum] = s:JoinContinueLine(line, lnum, 1)
@@ -509,7 +498,8 @@ function s:TailBslash()
 endfunction
 
 function s:LessOrMore(line, msum, lnum)
-  return indent(a:lnum) + s:sw() < strdisplaywidth(strpart(a:line, 0, a:msum))
+  return indent(a:lnum) + shiftwidth()
+        \ < strdisplaywidth(strpart(a:line, 0, a:msum))
 endfunction
 
 function s:GetMatchWidth(line, lnum, item)
@@ -518,7 +508,7 @@ function s:GetMatchWidth(line, lnum, item)
     let msum = match(line, a:item)
     if a:line =~# '\\$' && strpart(line, msum) =~# '^\s*\\$'
           \ && s:LessOrMore(line, msum, a:lnum)
-      let ind = indent(a:lnum) + s:sw()
+      let ind = indent(a:lnum) + shiftwidth()
     else
       let ind = strdisplaywidth(strpart(line, 0, msum)) + 1
     endif
@@ -531,7 +521,7 @@ function s:GetMatchWidth(line, lnum, item)
           \ && msum >= g:awk_indent_tail_bslash * -1)
           \ && strpart(line, a:item) =~# '^\s*\\$'
           \ && s:LessOrMore(line, a:item, a:lnum)
-      let ind = indent(a:lnum) + s:sw()
+      let ind = indent(a:lnum) + shiftwidth()
     elseif a:line =~# '\\$' && strpart(line, a:item) =~# '^\s*\\$'
       let ind = strdisplaywidth(strpart(line, 0, a:item))
     else
@@ -552,7 +542,7 @@ function s:CloseBraceIndent(cline, ind)
   if line =~# '^\s*{\s*$' || line =~# '^\s*switch\s*(.*)\s*{\s*$'
     return indent(lnum)
   else
-    return a:ind - s:sw()
+    return a:ind - shiftwidth()
   endif
 endfunction
 
@@ -561,7 +551,7 @@ function s:CurrentElseIndent(line, lnum, pline, pnum)
   let pnum = a:pnum
   let line = a:line
   let lnum = a:lnum
-  if line =~# '^\s*}\%(\s*\<else\>\%(\s\+if\)\@!\)\@!'
+  if line =~# '^\s*}\%(\s*\%(else\>\%(\s\+if\)\@!\|while\>\)\)\@!'
         \ || line =~# '}\%(\s*;\)\=\s*$'
     let [line, lnum] = s:GetStartPairLine(line, '}', '{', lnum, 0)
     if line =~# '^\s*\%(if\|}\=\s*else\s\+if\)\s*(.*)\s*{\s*$'
@@ -577,8 +567,7 @@ function s:CurrentElseIndent(line, lnum, pline, pnum)
   elseif line =~# '^\s*}\=\s*else\>\%(\s\+if\)\@!'
     let [line, lnum] = s:GetIfLine(line, lnum, 1)
     let [pline, pnum] = s:JoinContinueLine(line, lnum, 1)
-  elseif line =~# '^\s*while\>\s*(.*)'
-        \ && s:AfterParenPairNoStr(lnum, 0)
+  elseif line =~# '^\s*}\=\s*while\>\s*(.*)\%(\s*;\)\=\s*$'
     let [line, lnum] = s:GetDoLine(line, lnum)
     let [pline, pnum] = s:JoinContinueLine(line, lnum, 1)
   endif
@@ -637,11 +626,11 @@ function s:NestContinueLineIndent(line, lnum, i1, i2)
   elseif sum < 0
     return s:NestContinueLineIndent(line, lnum, a:i1, a:i2)
   elseif line =~# '^\s*return\>'
-    return s:GetMatchWidth(line, lnum, '\C\%(\s*return\>\)\@<=.')
+    return s:GetMatchWidth(line, lnum, '\C\<return\>\zs.')
   elseif line =~# '^\s*printf\=\>'
-    return s:GetMatchWidth(line, lnum, '\C\%(\s*printf\=\>\)\@<=.')
+    return s:GetMatchWidth(line, lnum, '\C\<printf\=\>\zs.')
   elseif s:GetHideStringLine(line) =~# '[^<>=!]==\@!'
-    return s:GetMatchWidth(line, lnum, '\%([^<>=!]=\)\@<=.')
+    return s:GetMatchWidth(line, lnum, '[^<>=!]=\zs.')
   else
     return indent(lnum)
   endif
@@ -744,14 +733,6 @@ function s:AfterParenPairNoStr(lnum, brace)
     return 1
   else
     return 0
-  endif
-endfunction
-
-function s:sw()
-  if exists("*shiftwidth")
-    return shiftwidth()
-  else
-    return &sw
   endif
 endfunction
 
