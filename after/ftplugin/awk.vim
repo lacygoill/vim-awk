@@ -30,11 +30,10 @@ setl tw=80
 
 " Teardown {{{1
 
-let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
-\                     .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-\                     ."
-\                       setl cms< cocu< cole< fdm< fdt< tw<
-\                    |  exe 'au! my_awk        * <buffer>'
-\                    |  exe 'au! my_awk_format * <buffer>'
-\                    |  exe 'nunmap <buffer> K'
-\                      "
+let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
+    \  . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+    \  . 'setl cms< cocu< cole< fdm< fdt< tw<'
+    \  . '| exe "au! my_awk * <buffer>"'
+    \  . '| exe "au! my_awk_format * <buffer>"'
+    \  . '| nunmap <buffer> K'
+
