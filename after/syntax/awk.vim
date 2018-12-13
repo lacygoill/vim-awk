@@ -1,24 +1,18 @@
-" syntax {{{1
-
-" define a syntax group for commented code
-syn region awkCommentCode matchgroup=Number start=/^\s*\zs#@\s\?/ end=/$/ concealends
-
-syn region awkBackticks matchgroup=Comment start=/`/ end=/`/ oneline concealends
-
-" replace noisy markers, used in folds, with ❭ and ❬
-exe 'syn match awkFoldMarkers  /#\=\s*{'.'{{\d*\s*\ze\n/  conceal cchar=❭  containedin=awkComment'
-exe 'syn match awkFoldMarkers  /#\=\s*}'.'}}\d*\s*\ze\n/  conceal cchar=❬  containedin=awkComment'
-
-" by default, `awkTodo` only contains the keyword `TODO`
-syn keyword awkTodo contained FIXME NOTE TODO XXX
-"                   │
-"                   └─ the group will be recognized only if it is mentioned
-"                      in the "contains" field of another match; i.e.:
+" Redefine the `awkParen` group to include our custom `awkComment` cluster.{{{
 "
-"                               syn … contains=awkTodo
+" The latter is defined in `lg#styled_comment#syntax()`:
+"
+"     ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+"}}}
+syn clear awkParen
+syn region awkParen transparent start="(" end=")" contains=ALLBUT,awkParenError,awkSpecialCharacter,awkArrayElement,awkArrayArray,awkTodo,awkRegExp,awkBrktRegExp,awkBrackets,awkCharClass,awkComment,@awkMyCustomGroups
 
-" colors {{{1
-
-hi link  awkCommentCode  Number
-hi link  awkBackticks    Backticks
+" Redefine the `awkComment` group to include our custom `awkCommentTitle` item.{{{
+"
+" The latter is defined in `lg#styled_comment#syntax()`:
+"
+"     ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+"}}}
+syn clear awkComment
+syn match awkComment /#.*/ contains=@Spell,awkTodo,awkCommentTitle
 

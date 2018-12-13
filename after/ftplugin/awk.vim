@@ -18,14 +18,6 @@ nno  <buffer><nowait><silent>  K  :<c-u>call lg#man_k('awk')<cr>
 " So no commentstring. We define one ourselves.
 setl cms=#%s
 
-augroup my_awk
-    au! *            <buffer>
-    au  BufWinEnter  <buffer>  setl fdm=marker
-                           \ | setl fdt=fold#fdt#get()
-                           \ | setl cocu=nc
-                           \ | setl cole=3
-augroup END
-
 setl tw=80
 
 " Teardown {{{1
@@ -33,9 +25,8 @@ setl tw=80
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \  . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \  . "
-    \ setl cms< cocu< cole< fdm< fdt< tw<
-    \|exe 'au! my_awk * <buffer>'
-    \|exe 'au! my_awk_format * <buffer>'
-    \|nunmap <buffer> K
-    \"
+    \   setl cms< tw<
+    \ | exe 'au! my_awk_format * <buffer>'
+    \ | exe 'nunmap <buffer> K'
+    \ "
 
