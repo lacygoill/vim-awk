@@ -21,31 +21,3 @@ resulting indentation is often wrong.
 
 The configuration relies on a set of global variables documented at the top of the script.
 
-    Description:
-                     let g:awk_indent_switch_labels = 0
-                             switch (label) {
-                             case /A/:
-
-                     let g:awk_indent_switch_labels = 1
-                             switch (label) {
-                                 case /A/:
-                                                       (default: 1, disable: -1)
-
-                     let g:awk_indent_curly_braces = 0
-                             if (brace)
-                             {
-
-                     let g:awk_indent_curly_braces = 1
-                             if (brace)
-                                 {
-                                                       (default: 0)
-
-                     let g:awk_indent_tail_bslash = 2
-                             function_name(  \
-                                           arg1, arg2, arg3)
-
-                     let g:awk_indent_tail_bslash = -2
-                             function_name(  \
-                                 arg1, arg2, arg3)
-                                                       (default: 2, disable: 0)
-
