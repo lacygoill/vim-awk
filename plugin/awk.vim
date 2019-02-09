@@ -4,7 +4,7 @@ endif
 let g:loaded_awk = 1
 
 " These options control how the `=` operator indent lines.
-" For more info, see read the top of the script at `./indent/awk.vim`.
+" For more info, read the top of the script at `./indent/awk.vim`.
 
 "     let g:awk_indent_switch_labels = 0{{{
 "             switch (label) {
