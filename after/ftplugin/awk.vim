@@ -9,7 +9,7 @@ nno  <buffer><nowait><silent>  K  :<c-u>call lg#man_k('awk')<cr>
 " But there's no `awk.vim` file there.
 "
 " So no commentstring. We define one ourselves.
-setl cms=#%s
+setl cms=#\ %s
 
 setl tw=80
 
