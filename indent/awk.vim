@@ -107,12 +107,12 @@ function s:ContinueLineIndent(lnum, cline)
         \ && a:cline =~ '^\s*[-+/*%^=]'
     let ind = s:GetMatchWidth(line, lnum, '=')
   elseif line =~ '[^<>=!]==\@!\s*[^\\[:blank:]]'
-        \ && s:IsTailContinue(line, 1) && !s:IsTailContinue(pline)
+        \ && s:IsTailContinue(line, v:true) && !s:IsTailContinue(pline)
     let ind = s:GetMatchWidth(line, lnum, '[^<>=!]=\s*\zs.')
   elseif line =~ '^\s\+\h\w*\s\+[^-+/*%^=\\[:blank:]]'
         \ && s:IsTailContinue(line) && !s:IsTailContinue(pline)
     let ind = s:GetMatchWidth(line, lnum, '\h\w*\s\+\zs\S')
-  elseif s:IsTailContinue(line, 1) && !s:IsTailContinue(pline)
+  elseif s:IsTailContinue(line, v:true) && !s:IsTailContinue(pline)
     let ind += ind ? shiftwidth() : shiftwidth() * 2
   endif
   return [line, lnum, ind]

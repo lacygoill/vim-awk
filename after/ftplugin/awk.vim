@@ -1,9 +1,11 @@
-" Options {{{1
+vim9script
 
-setl tw=80
+# Options {{{1
 
-" Teardown {{{1
+&l:textwidth = 80
 
-let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ .. "| setl tw<"
+# Teardown {{{1
+
+b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
+    .. '| set textwidth<'
 
