@@ -6,6 +6,6 @@ vim9script
 
 # Teardown {{{1
 
-b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
+b:undo_ftplugin = get(b:, 'undo_ftplugin', 'execute')
     .. '| set textwidth<'
 
